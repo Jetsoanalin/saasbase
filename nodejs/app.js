@@ -11,7 +11,7 @@ const upload = multer();
 const getApi = require('./services/ApiService') ;
 const clientApiKeyValidation = require('./common/authUtils');
 
-const db = require('./db');
+const sqldb = require('./sqldb');
 // const VerifyToken = require('./auth/VerifyToken')
 
 // Calling the Routes 
@@ -69,6 +69,12 @@ app.use(express.static('public'));
 // Setting Up API Key Handler for All System APIs
 // app.use(getApi.getApi(process.env.apikey,process.env.uuid));
 
+
+// Checking and Testing of Home
+app.get('/', (req, res) => {
+    console.log(req.sessionID)
+    res.send(`You hit home page!\n`)
+  })
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
