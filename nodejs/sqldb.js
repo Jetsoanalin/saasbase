@@ -1,29 +1,29 @@
-// const mysql = require('mysql');
+const mysql = require('mysql');
 
-// const con = mysql.createConnection({
-//   host: "localhost",
-//   user: "root",
-//   password: "root"
-// });
+const con = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "root"
+});
 
-// const dbname = "cryptwallet";
+const dbname = "cryptwallet";
 
-// con.connect(function(err) {
-//   if (err) {
-//     console.log(err);
-//     console.log("SQL Database Not Connected");
-//   }
-//   else{
-//     console.log("SQL Database Connected!");
-//     con.query("CREATE DATABASE IF NOT EXISTS "+dbname, function (err, result) {
-//       if (err) {
-//         console.log(err);
-//         console.log("SQL Database with name "+dbname+" Already Exists");
-//       }
-//       else{
-//         console.log("SQL Database "+dbname+" is Active");  
-//       }
-//     });  
-//   }
+con.connect(function(err) {
+  if (err) {
+    // console.log(err);
+    console.log("SQL Database Not Connected");
+  }
+  else{
+    console.log("SQL Database Connected!");
+    con.query("CREATE DATABASE IF NOT EXISTS "+dbname, function (err, result) {
+      if (err) {
+        console.log(err);
+        console.log("SQL Database with name "+dbname+" Already Exists");
+      }
+      else{
+        console.log("SQL Database "+dbname+" is Active");  
+      }
+    });  
+  }
   
-// });
+});

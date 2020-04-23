@@ -34,6 +34,19 @@ services:
       - dbdata:/data/db
     networks:
       - app-network  
+  sqldb:
+    image: mysql:5.7
+    container_name: sqldb
+    restart: unless-stopped
+    # env_file: .env
+    environment:
+      - MYSQL_HOST=localhost
+      - MYSQL_DATABASE=cryptwallet
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:     
+        - sqldbdata:/data/sqldb
+    networks:
+        - app-network
 
 networks:
   app-network:
@@ -41,3 +54,4 @@ networks:
 
 volumes:
   dbdata:
+  sqldbdata:
