@@ -14,7 +14,7 @@ con.connect(function(err) {
     console.log("SQL Database Not Connected");
   }
   else{
-    console.log("SQL Database Connected!");
+    // console.log("SQL Database Connected!");
     con.query("CREATE DATABASE IF NOT EXISTS "+dbname, function (err, result) {
       if (err) {
         console.log(err);

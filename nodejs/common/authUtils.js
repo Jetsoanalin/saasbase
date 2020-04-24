@@ -25,3 +25,20 @@ exports.clientApiKeyValidation = async (req, res, next) => {
     }
 
 }
+
+exports.sessionauth = async (req, res, next) => {
+
+    try {
+        if (req.session.user) {
+            next();
+          } else {
+            res.status(401).send('Authrization failed! Please login');
+          }
+    } catch (e) {
+        return res.status(400).send({
+            status: false,
+            message: "Authrization failed!"
+        })
+    }
+
+}

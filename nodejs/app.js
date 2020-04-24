@@ -8,10 +8,19 @@ const hpp = require('hpp');
 const cors = require('cors');
 const multer = require('multer');
 const upload = multer();
+const session = require('express-session');
+
+const { secret } = require('./config');
 const getApi = require('./services/ApiService') ;
 const clientApiKeyValidation = require('./common/authUtils');
+const sessinauth = require('./common/authUtils');
 
+
+// Importing The Database
 const sqldb = require('./sqldb');
+const mongodb = require('./mongodb');
+
+// Importing Token Verification
 // const VerifyToken = require('./auth/VerifyToken')
 
 // Calling the Routes 
@@ -32,8 +41,8 @@ app.use(cors());
 app.use(helmet());
 
 // API Key Service Call
-const apiService = require('./routes/ApiServiceRoutes');
-app.use(clientApiKeyValidation.clientApiKeyValidation);
+// const apiService = require('./routes/ApiServiceRoutes');
+// app.use(clientApiKeyValidation.clientApiKeyValidation);
 
 // Limit request from the same API 
 const limiter = rateLimit({
@@ -47,6 +56,15 @@ app.use('/api/v1', limiter);
 app.use(express.json({
     limit: '100kb'
 }));
+
+// Configure the Session expiry
+app.use(
+    session({
+      secret: secret,
+      resave: true,
+      saveUninitialized: false
+    })
+);
 
 // Data sanitization against Nosql query injection
 app.use(mongoSanitize());
@@ -70,17 +88,32 @@ app.use(express.static('public'));
 // app.use(getApi.getApi(process.env.apikey,process.env.uuid));
 
 
+
 // Checking and Testing of Home
 app.get('/', (req, res) => {
-    console.log(req.sessionID)
+    // console.log(req.session)
     res.send(`You hit home page!\n`)
-  })
+})
+app.get('/home',sessinauth.sessionauth, (req, res) => {
+    res.send(`You are seeing this because you have a valid session.
+          Your username is ${req.session.user.username} 
+          and email is ${req.session.user.email}.`)
+})
+
+
+// Logout from all:
+app.all('/logout', (req, res) => {
+    delete req.session.user; // any of these works
+    req.session.destroy(); // any of these works
+    res.status(200).send('logout successful')
+})
+
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
 
 // API service creation Route
-app.use('/admin/v1/service',apiService);
+// app.use('/admin/v1/service',apiService);
 
 // handle undefined Routes
 app.use('*', (req, res, next) => {
