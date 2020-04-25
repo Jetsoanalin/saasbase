@@ -9,75 +9,6 @@ const shortid = require('shortid');
 const nodemailer = require('nodemailer');
 
 
-// exports.loginadmin = async (req, res, next) => {
-//     try {
-//         User.findOne({ email: req.body.email }, function (err, user) {
-//             if (err) return res.status(500).send('Error on the server.');
-//             if (!user) return res.status(404).send('No user found.');
-            
-//             // check if the password is valid
-//             var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
-//             if (!passwordIsValid) return res.status(401).send({ auth: false, token: null });
-        
-//             // if user is found and password is valid
-//             // create a token
-//             var token = jwt.sign({ id: user._id }, config.secret, {
-//               expiresIn: 86400 // expires in 24 hours
-//             });
-
-//             res.status(200).json({
-//                 status: true,
-//                 message : 'Authentication Check',
-//                 data: {
-//                     auth: true, token: token
-//                 }
-//             });
-//         });
-    
-//     } catch (err) {
-//         next(err);
-//     }
-// };
-
-// exports.logoutadmin = async (req, res, next) => {
-//     try {
-    
-//         res.status(200).json({
-//             status: true,
-//             message : 'Logout',
-//             data: {
-//                 auth: false, token: null
-//             }
-//         });
-    
-//     } catch (err) {
-//         next(err);
-//     }
-// };
-
-// exports.registeradmin = async (req, res, next) => {
-//     try {
-    
-//         var hashedPassword = bcrypt.hashSync(req.body.password, 8);
-
-//         User.create({
-//             name : req.body.name,
-//             email : req.body.email,
-//             password : hashedPassword
-//         }, 
-//         function (err, user) {
-//             if (err) return res.status(500).send("There was a problem adding the information to the database.");
-//             res.status(200).send(user);
-//         });
-        
-//     } catch (err) {
-//         next(err);
-//     }
-// };
-
-
-
-
 exports.signup = async (req, res, next) => {
     try {
 
@@ -91,28 +22,31 @@ exports.signup = async (req, res, next) => {
         };
         
         let newUser = new User(userData);
-        newUser.save().then(error => {
-            if (!error) {
-                console.log('1')
-                return res.status(201).json('signup successful')
+        newUser.save().then((response) => {
+            if (response) {
+                res.status(200).json({
+                  status: true,
+                  message : 'Signup Successful! Please Login!',
+                }) 
+                return res.status(201).json('Signup Successful')
             } 
-            else{
-                return res.status(400).send(error)
-            }
-            // else {
-            //     if (err.code && err.code === 11000) { // this error gets thrown only if similar user record already exist.
-            //         console.log('2')
-
-            //         return res.status(409).send('user already exist!')
-            //     } else {
-            //         console.log(JSON.stringigy(error, null, 2)); // you might want to do this to examine and trace where the problem is emanating from
-            //         console.log('3')
-
-            //         return res.status(500).send('error signing up user')
-            //     }
-            // }
-            
-        })
+        }).catch(error => {
+          if (error.code && error.code === 11000) { // this error gets thrown only if similar user record already exist.
+            res.status(409).json({
+              status: false,
+              message : 'User with Email ID already exist!',
+            })      
+            } else {
+                // console.log(JSON.stringigy(error, null, 2)); // you might want to do this to examine and trace where the problem is emanating from
+                res.status(500).json({
+                  status: false,
+                  message : 'Error Signing up User, Please Try again Later',
+                  data : {
+                    error: JSON.stringigy(error, null, 2)
+                  }
+                })
+              }        
+          })
         
     } catch (err) {
         next(err);
@@ -136,12 +70,21 @@ exports.login = async (req, res, next) => {
                 req.session.user.expires = new Date(
                   Date.now() + 3 * 24 * 3600 * 1000 // session expires in 3 days
                 );
-                res.status(200).send('You are logged in, Welcome!');
+                res.status(200).json({
+                  status: true,
+                  message : 'You are logged in, Welcome!',
+                })
             } else {
-            	res.status(401).send('incorrect password');
+                res.status(401).json({
+                  status: false,
+                  message : 'incorrect password',
+                })
             }
         } else {
-        	res.status(401).send('invalid login credentials')
+          res.status(401).json({
+            status: false,
+            message : 'invalid login credentials',
+          });
         }
     })
         
@@ -174,7 +117,7 @@ exports.forgot = async (req, res, next) => {
                   });
                   let mailOptions = {
                     subject: `SaasBase | Password reset`,
-                    from: '"Fred Foo 👻" <lifeblockg1@gmail.com>', // sender address
+                    from: '"Jetso Dev 👻" <lifeblockg1@gmail.com>', // sender address
                     to: email, // list of receivers
                     html: `
                       <h1>Hi,</h1>
@@ -186,19 +129,31 @@ exports.forgot = async (req, res, next) => {
                     transporter.sendMail(mailOptions, (error, response) => {
                       if (error) {
                         // console.log("error:\n", error, "\n");
-                        res.status(500).send("could not send reset code");
+                        res.status(500).json({
+                          status: false,
+                          message : 'Could not send reset code',
+                        });
                       } else {
                         // console.log("email sent:\n", response);
-                        res.status(200).send("Reset Code sent");
+                          res.status(200).json({
+                            status: true,
+                            message : 'Reset Code sent',
+                          });
                       }
                     });
                   } catch (error) {
-                    res.status(500).send("could not sent reset code");
+                      res.status(500).json({
+                        status: false,
+                        message : 'Could not sent reset code, Please try again Later',
+                      });
                   }
                 }
               })
           } else {
-            res.status(400).send('email is incorrect');
+              res.status(400).json({
+                status: false,
+                message : 'Email is incorrect',
+              });
           }
         })
         
@@ -213,7 +168,10 @@ exports.resetpass = async (req, res, next) => {
     
         let {resetKey, newPassword} = req.body
         User.find({passResetKey: resetKey}, (err, userData) => {
+          if(userData != '')
+          {
             if (!err) {
+              
                 let now = new Date().getTime();
                 let keyExpiration = userData[0].passKeyExpires;
                 if (keyExpiration > now) {
@@ -222,17 +180,36 @@ exports.resetpass = async (req, res, next) => {
                     userData[0].keyExpiration = null;
                     userData[0].save().then(result => { // save the new changes
                         if (result) {
-                            res.status(200).send('Password reset successful')
+                          res.status(200).json({
+                            status: true,
+                            message : 'Password reset successful !',
+                          });
                         } else {
-                            res.status(500).send('error resetting your password')
+                            res.status(500).json({
+                              status: false,
+                              message : 'Error resetting your password, Please Try again Later !',
+                            });
                         }
                     })
                 } else {
-                    res.status(400).send('Sorry, pass key has expired. Please initiate the request for a new one');
+                    res.status(400).json({
+                      status: false,
+                      message : 'Sorry, pass key has expired. Please initiate the request for a new one',
+                    });
                 }
             } else {
-                res.status(400).send('invalid pass key!');
+                res.status(400).json({
+                  status: false,
+                  message : 'invalid Reset pass key!',
+                });
+          
             }
+          }else{
+            res.status(400).json({
+              status: false,
+              message : 'Reset Key is not generated for your emailID!, Please click on Reset Password',
+            });
+          }
         })
         
     } catch (err) {
