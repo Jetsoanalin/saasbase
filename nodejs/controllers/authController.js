@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const config = require('../config'); // get config file
 const mongodb = require('../mongodb');
 const shortid = require('shortid');
+const nodemailer = require('nodemailer');
 
 
 // exports.loginadmin = async (req, res, next) => {
@@ -159,39 +160,39 @@ exports.forgot = async (req, res, next) => {
           if (!err) {
             userData.passResetKey = shortid.generate();
             userData.passKeyExpires = new Date().getTime() + 20 * 60 * 1000 // pass reset key only valid for 20 minutes
-            userData.save().then(err => {
-                if (!err) {
+            userData.save().then(result => {
+                if (result) {
                   // configuring smtp transport machanism for password reset email
                   let transporter = nodemailer.createTransport({
-                    service: "gmail",
-                    port: 465,
+                    host: "smtp.gmail.com",
+                    port: 587,
+                    secure: false, // true for 465, false for other ports
                     auth: {
-                      user: 'lifeblockg1@gmail.com', // your gmail address
-                      pass: 'jetsorock' // your gmail password
+                      user: 'lifeblockg1@gmail.com', // generated ethereal user
+                      pass: 'jetsorock' // generated ethereal password
                     }
                   });
                   let mailOptions = {
                     subject: `SaasBase | Password reset`,
-                    to: email,
-                    from: `Jetso <lifeblockg1@gmail.com>`,
+                    from: '"Fred Foo 👻" <lifeblockg1@gmail.com>', // sender address
+                    to: email, // list of receivers
                     html: `
                       <h1>Hi,</h1>
                       <h2>Here is your password reset key</h2>
-                      <h2><code contenteditable="false" style="font-weight:200;font-size:1.5rem;padding:5px 10px; background: #EEEEEE; border:0">${passResetKey}</code></h4>
+                      <h2><code contenteditable="false" style="font-weight:200;font-size:1.5rem;padding:5px 10px; background: #EEEEEE; border:0">${userData.passResetKey}</code></h4>
                       <p>Please ignore if you didn't try to reset your password on our platform</p>`
                   };
                   try {
                     transporter.sendMail(mailOptions, (error, response) => {
                       if (error) {
-                        console.log("error:\n", error, "\n");
+                        // console.log("error:\n", error, "\n");
                         res.status(500).send("could not send reset code");
                       } else {
-                        console.log("email sent:\n", response);
+                        // console.log("email sent:\n", response);
                         res.status(200).send("Reset Code sent");
                       }
                     });
                   } catch (error) {
-                    console.log(error);
                     res.status(500).send("could not sent reset code");
                   }
                 }
@@ -214,7 +215,7 @@ exports.resetpass = async (req, res, next) => {
         User.find({passResetKey: resetKey}, (err, userData) => {
             if (!err) {
                 let now = new Date().getTime();
-                let keyExpiration = userData.username;
+                let keyExpiration = userData.passKeyExpires;
                 console.log(keyExpiration, now)
                 if (keyExpiration > now) {
                     userData.password = bcrypt.hashSync(newPassword, 5);
