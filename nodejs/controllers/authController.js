@@ -215,14 +215,13 @@ exports.resetpass = async (req, res, next) => {
         User.find({passResetKey: resetKey}, (err, userData) => {
             if (!err) {
                 let now = new Date().getTime();
-                let keyExpiration = userData.passKeyExpires;
-                console.log(keyExpiration, now)
+                let keyExpiration = userData[0].passKeyExpires;
                 if (keyExpiration > now) {
-                    userData.password = bcrypt.hashSync(newPassword, 5);
-                    userData.passResetKey = null; // remove passResetKey from user's records
-                    userData.keyExpiration = null;
-                    userData.save().then(err => { // save the new changes
-                        if (!err) {
+                    userData[0].password = bcrypt.hashSync(newPassword, 5);
+                    userData[0].passResetKey = null; // remove passResetKey from user's records
+                    userData[0].keyExpiration = null;
+                    userData[0].save().then(result => { // save the new changes
+                        if (result) {
                             res.status(200).send('Password reset successful')
                         } else {
                             res.status(500).send('error resetting your password')
