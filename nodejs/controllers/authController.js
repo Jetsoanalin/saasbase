@@ -111,8 +111,8 @@ exports.forgot = async (req, res, next) => {
                     port: 587,
                     secure: false, // true for 465, false for other ports
                     auth: {
-                      user: 'lifeblockg1@gmail.com', // generated ethereal user
-                      pass: 'jetsorock' // generated ethereal password
+                      user: 'your gmail address', // generated ethereal user (allow less secure apps in gmail)
+                      pass: 'your gmail password' // generated ethereal password
                     }
                   });
                   let mailOptions = {
