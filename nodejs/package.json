@@ -51,7 +51,7 @@
     "mongoose": "latest",
     "multer": "^1.4.2",
     "mysql": "latest",
-    "nodemailer": "^6.4.6",
+    "nodemailer": "^6.4.16",
     "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^1.18.10",
     "scryptsy": "^2.0.0",
