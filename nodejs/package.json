@@ -37,7 +37,7 @@
     "ejs": "^2.6.1",
     "encode32": "^1.1.0",
     "ethers": "^4.0.41",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "express-flash": "0.0.2",
     "express-mongo-sanitize": "latest",
     "express-rate-limit": "^5.0.0",
