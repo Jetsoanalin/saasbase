@@ -46,7 +46,7 @@
     "helmet": "^3.21.2",
     "hpp": "^0.2.2",
     "js-to-ts-converter": "^0.16.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mongodb": "latest",
     "mongoose": "latest",
     "multer": "^1.4.2",
